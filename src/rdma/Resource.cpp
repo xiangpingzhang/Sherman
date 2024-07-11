@@ -1,4 +1,7 @@
 #include "Rdma.h"
+#include <inttypes.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 bool createContext(RdmaContext *context, uint8_t port, int gidIndex,
                    uint8_t devIndex) {
@@ -25,7 +28,7 @@ bool createContext(RdmaContext *context, uint8_t port, int gidIndex,
 
   for (int i = 0; i < devicesNum; ++i) {
     // printf("Device %d: %s\n", i, ibv_get_device_name(deviceList[i]));
-    if (ibv_get_device_name(deviceList[i])[5] == '0') {
+    if (ibv_get_device_name(deviceList[i])[5] == 'mlx5_0') {
       devIndex = i;
       break;
     }
@@ -136,10 +139,10 @@ ibv_mr *createMemoryRegion(uint64_t mm, uint64_t mmSize, RdmaContext *ctx) {
   return mr;
 }
 
-ibv_mr *createMemoryRegionOnChip(uint64_t mm, uint64_t mmSize,
+/*ibv_mr *createMemoryRegionOnChip(uint64_t mm, uint64_t mmSize,
                                  RdmaContext *ctx) {
 
-  /* Device memory allocation request */
+  //Device memory allocation request 
   struct ibv_exp_alloc_dm_attr dm_attr;
   memset(&dm_attr, 0, sizeof(dm_attr));
   dm_attr.length = mmSize;
@@ -149,7 +152,7 @@ ibv_mr *createMemoryRegionOnChip(uint64_t mm, uint64_t mmSize,
     return nullptr;
   }
 
-  /* Device memory registration as memory region */
+  //Device memory registration as memory region 
   struct ibv_exp_reg_mr_in mr_in;
   memset(&mr_in, 0, sizeof(mr_in));
   mr_in.pd = ctx->pd, mr_in.addr = (void *)mm, mr_in.length = mmSize,
@@ -179,13 +182,13 @@ ibv_mr *createMemoryRegionOnChip(uint64_t mm, uint64_t mmSize,
   free(buffer);
 
   return mr;
-}
+}*/
 
 bool createQueuePair(ibv_qp **qp, ibv_qp_type mode, ibv_cq *send_cq,
                      ibv_cq *recv_cq, RdmaContext *context,
                      uint32_t qpsMaxDepth, uint32_t maxInlineData) {
 
-  struct ibv_exp_qp_init_attr attr;
+  struct ibv_qp_init_attr_ex attr;
   memset(&attr, 0, sizeof(attr));
 
   attr.qp_type = mode;
@@ -193,13 +196,16 @@ bool createQueuePair(ibv_qp **qp, ibv_qp_type mode, ibv_cq *send_cq,
   attr.send_cq = send_cq;
   attr.recv_cq = recv_cq;
   attr.pd = context->pd;
-
-  if (mode == IBV_QPT_RC) {
-    attr.comp_mask = IBV_EXP_QP_INIT_ATTR_CREATE_FLAGS |
-                     IBV_EXP_QP_INIT_ATTR_PD | IBV_EXP_QP_INIT_ATTR_ATOMICS_ARG;
-    attr.max_atomic_arg = 32;
-  } else {
-    attr.comp_mask = IBV_EXP_QP_INIT_ATTR_PD;
+  
+  if (mode == IBV_QPT_RC)
+  {
+    attr.comp_mask |= IBV_QP_INIT_ATTR_PD |
+						  IBV_QP_INIT_ATTR_SEND_OPS_FLAGS;
+    //attr.max_atomic_arg = 32;
+  }
+  else
+  {
+    attr.comp_mask = IBV_QP_INIT_ATTR_PD;
   }
 
   attr.cap.max_send_wr = qpsMaxDepth;
@@ -208,7 +214,7 @@ bool createQueuePair(ibv_qp **qp, ibv_qp_type mode, ibv_cq *send_cq,
   attr.cap.max_recv_sge = 1;
   attr.cap.max_inline_data = maxInlineData;
 
-  *qp = ibv_exp_create_qp(context->ctx, &attr);
+  *qp = ibv_create_qp_ex(context->ctx, &attr);
   if (!(*qp)) {
     Debug::notifyError("Failed to create QP");
     return false;
@@ -225,7 +231,7 @@ bool createQueuePair(ibv_qp **qp, ibv_qp_type mode, ibv_cq *cq,
   return createQueuePair(qp, mode, cq, cq, context, qpsMaxDepth, maxInlineData);
 }
 
-bool createDCTarget(ibv_exp_dct **dct, ibv_cq *cq, RdmaContext *context,
+/*bool createDCTarget(ibv_exp_dct **dct, ibv_cq *cq, RdmaContext *context,
                     uint32_t qpsMaxDepth, uint32_t maxInlineData) {
 
   // construct SRQ fot DC Target :)
@@ -260,7 +266,7 @@ bool createDCTarget(ibv_exp_dct **dct, ibv_cq *cq, RdmaContext *context,
   }
 
   return true;
-}
+}*/
 
 void fillAhAttr(ibv_ah_attr *attr, uint32_t remoteLid, uint8_t *remoteGid,
                 RdmaContext *context) {

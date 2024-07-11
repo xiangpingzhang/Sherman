@@ -35,7 +35,7 @@ void rdmaQueryQueuePair(ibv_qp *qp) {
 }
 
 void checkDMSupported(struct ibv_context *ctx) {
-  struct ibv_exp_device_attr attrs;
+/*  struct ibv_exp_device_attr attrs;
 
   attrs.comp_mask = IBV_EXP_DEVICE_ATTR_UMR;
   attrs.comp_mask |= IBV_EXP_DEVICE_ATTR_MAX_DM_SIZE;
@@ -51,5 +51,5 @@ void checkDMSupported(struct ibv_context *ctx) {
   } else {
     kMaxDeviceMemorySize = attrs.max_dm_size;
     printf("The RNIC has %dKB device memory\n", kMaxDeviceMemorySize / 1024);
-  }
+  }*/
 }

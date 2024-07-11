@@ -68,7 +68,7 @@ static inline void fillSgeWr(ibv_sge &sg, ibv_recv_wr &wr, uint64_t source,
   wr.num_sge = 1;
 }
 
-static inline void fillSgeWr(ibv_sge &sg, ibv_exp_send_wr &wr, uint64_t source,
+/*static inline void fillSgeWr(ibv_sge &sg, ibv_exp_send_wr &wr, uint64_t source,
                              uint64_t size, uint32_t lkey) {
   memset(&sg, 0, sizeof(sg));
   sg.addr = (uintptr_t)source;
@@ -79,7 +79,7 @@ static inline void fillSgeWr(ibv_sge &sg, ibv_exp_send_wr &wr, uint64_t source,
   wr.wr_id = 0;
   wr.sg_list = &sg;
   wr.num_sge = 1;
-}
+}*/
 
 // for UD and DC
 bool rdmaSend(ibv_qp *qp, uint64_t source, uint64_t size, uint32_t lkey,
@@ -253,7 +253,7 @@ bool rdmaFetchAndAdd(ibv_qp *qp, uint64_t source, uint64_t dest, uint64_t add,
 bool rdmaFetchAndAddBoundary(ibv_qp *qp, uint64_t source, uint64_t dest,
                              uint64_t add, uint32_t lkey, uint32_t remoteRKey,
                              uint64_t boundary, bool singal, uint64_t wr_id) {
-  struct ibv_sge sg;
+  /*struct ibv_sge sg;
   struct ibv_exp_send_wr wr;
   struct ibv_exp_send_wr *wrBad;
 
@@ -278,7 +278,7 @@ bool rdmaFetchAndAddBoundary(ibv_qp *qp, uint64_t source, uint64_t dest,
   if (ibv_exp_post_send(qp, &wr, &wrBad)) {
     Debug::notifyError("Send with MASK FETCH_AND_ADD failed.");
     return false;
-  }
+  }*/
   return true;
 }
 
@@ -316,7 +316,7 @@ bool rdmaCompareAndSwap(ibv_qp *qp, uint64_t source, uint64_t dest,
 bool rdmaCompareAndSwapMask(ibv_qp *qp, uint64_t source, uint64_t dest,
                             uint64_t compare, uint64_t swap, uint32_t lkey,
                             uint32_t remoteRKey, uint64_t mask, bool singal) {
-  struct ibv_sge sg;
+  /*struct ibv_sge sg;
   struct ibv_exp_send_wr wr;
   struct ibv_exp_send_wr *wrBad;
 
@@ -343,7 +343,7 @@ bool rdmaCompareAndSwapMask(ibv_qp *qp, uint64_t source, uint64_t dest,
   if (ibv_exp_post_send(qp, &wr, &wrBad)) {
     Debug::notifyError("Send with MASK ATOMIC_CMP_AND_SWP failed.");
     return false;
-  }
+  }*/
   return true;
 }
 
